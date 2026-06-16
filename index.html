@@ -175,7 +175,7 @@ let DB=null, ONLINE=false;
 let STATE={preds:{}, results:{}, players:{}, koTeams:{}};
 const PID = (()=>{ let v=localStorage.getItem('pid'); if(!v){v='p_'+Math.random().toString(36).slice(2,10);localStorage.setItem('pid',v);} return v; })();
 let NAME = localStorage.getItem('name')||"";
-let TAB='pron', ADMIN=false;
+let TAB='pron', ADMIN=false, editing=false;
 
 const cfgOk = !firebaseConfig.apiKey.startsWith("__");
 if(cfgOk){
@@ -214,6 +214,7 @@ function pointsFor(pred,res){
    ============================================================ */
 function render(){
   document.getElementById('meLabel').textContent = NAME?("Joueur : "+NAME):"";
+  if(TAB==='pron' && editing) return;   // ne pas reconstruire pendant la saisie
   if(TAB==='pron') renderPron();
   else if(TAB==='rank') renderRank();
   else if(TAB==='admin') renderAdmin();
@@ -263,6 +264,8 @@ function renderPron(){
   });
   const v=document.getElementById('view'); v.innerHTML=html;
   v.querySelectorAll('.match input').forEach(inp=>{
+    inp.addEventListener('focus',()=>{editing=true;});
+    inp.addEventListener('blur',()=>{setTimeout(()=>{editing=false;},150);});
     inp.addEventListener('change',e=>{
       const mid=e.target.closest('.match').dataset.mid;
       const side=e.target.dataset.side;
